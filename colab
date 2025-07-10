@@ -1,0 +1,61 @@
+
+# STEP 1: Install compatible dependencies
+!pip install --upgrade --quiet --force-reinstall \
+  torch==2.6.0 torchvision==0.21.0+cu124 torchaudio==2.6.0+cu124 \
+  --extra-index-url https://download.pytorch.org/whl/cu124
+
+!pip install --upgrade --quiet --force-reinstall \
+  diffusers==0.27.2 transformers==4.41.1 accelerate xformers \
+  scipy==1.15.1 safetensors
+
+# STEP 2: Restart runtime to apply changes (for Colab)
+import os
+os.kill(os.getpid(), 9)
+
+After restart, run this next block
+
+  # STEP 3: Import required libraries
+import torch
+from diffusers import StableDiffusionXLPipeline
+from PIL import Image
+from IPython.display import display
+
+# STEP 4: Set device (GPU if available)
+device = "cuda" if torch.cuda.is_available() else "cpu"
+torch_dtype = torch.float16 if device == "cuda" else torch.float32
+
+# STEP 5: Load Stable Diffusion XL model
+model_id = "stabilityai/stable-diffusion-xl-base-1.0"
+pipe = StableDiffusionXLPipeline.from_pretrained(
+    model_id,
+    torch_dtype=torch_dtype,
+    variant="fp16" if device == "cuda" else None,
+    use_safetensors=True
+).to(device)
+
+# STEP 6: Enable memory optimizations
+pipe.enable_model_cpu_offload()
+pipe.enable_attention_slicing()
+pipe.enable_xformers_memory_efficient_attention()
+
+# STEP 7: Image generation function
+def generate_image(prompt):
+    with torch.inference_mode():
+        image = pipe(
+            prompt=prompt,
+            num_inference_steps=25,
+            guidance_scale=7.5
+        ).images[0]
+    return image
+
+# STEP 8: Set your prompt
+prompt = (
+    "Architectural floor plan of an 8BHK apartment, "
+    "with clearly labeled rooms: Living Room, Bedroom, Kitchen, Bathroom. "
+    "Top-down view, professional blueprint style, sharp edges, CAD drawing, text in English."
+)
+
+# STEP 9: Generate, display, and save image
+image = generate_image(prompt)
+display(image)
+image.save("generated_blueprint.png")
