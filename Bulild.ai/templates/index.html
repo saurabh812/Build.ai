@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Blueprint Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 40px;
+            background-color: #f4f4f4;
+            text-align: center;
+        }
+        input[type="text"] {
+            width: 60%;
+            padding: 10px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+        img {
+            margin-top: 30px;
+            max-width: 80%;
+            border: 2px solid #333;
+        }
+    </style>
+</head>
+<body>
+    <h1>Generate Floor Plan Blueprint</h1>
+    <form method="POST">
+        <input type="text" name="prompt" placeholder="Enter your prompt..." required>
+        <button type="submit">Generate</button>
+    </form>
+
+    {% if image %}
+        <h2>Generated Image:</h2>
+        <img src="{{ image }}" alt="Generated Image">
+    {% endif %}
+</body>
+</html>
